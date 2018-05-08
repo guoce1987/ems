@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<style>
+    .table th, .table td {
+        text-align: center;
+        vertical-align: middle!important;
+    }
+</style>
+<head lang="en">
+    <meta charset="UTF-8" />
+    <title></title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- 可选的Bootstrap主题文件（一般不使用） -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"></script>
+
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script src="https://cdn.bootcss.com/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+</head>
+<body>
+<!-- 通过thymeleaf引入图片路径 -->
+<!--<img alt="test" th:src="@{images/leaf.jpg}" />-->
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="col-sm-7">
+                <div class="row" align="center"><h1>设备管理表</h1></div>
+                <div class="row">
+                        <div class="col-md- nowrap">
+                            <table id="tb" class="table table-bordered table-condensed table-hover">
+                                <tr>
+                                    <th>编号</th>
+                                    <th>属性:值</th>
+                                    <th>权限</th>
+                                    <th>二维码</th>
+                                    <th>操作</th>
+                                </tr>
+                                <tr th:each="equipment : ${list}">
+                                    <td style='vertical-align: middle;text-align: center;' th:text="${equipment.id}"></td>
+                                    <td style='vertical-align: middle;text-align: center;' th:text="${equipment.value}"></td>
+                                    <td style='vertical-align: middle;text-align: center;' th:text="${equipment.rights}"></td>
+                                    <td align="center" style='vertical-align: middle;text-align: center;' th:text="${equipment.id}"></td>
+                                    <td style='vertical-align: middle;text-align: center;'><button class="btn btn-primary">本地导出</button>&nbsp;&nbsp;<br/><br/><button class="btn btn-info">上传到服务器</button></td>
+                                </tr>
+                            </table>
+                        </div>
+                </div>
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="col-sm-4">
+                <h3 class="text-center">
+                    设备信息表格上传
+                </h3>
+                <form class="form-horizontal" method="POST" action="/excel/upload" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" class="btn btn-lg form-control-file" name="file" /><input class="btn btn-default btn-block" type="submit" value="Submit" />
+                        <div th:if="${result}">
+                            <h2 th:text="${result}"/>
+                        </div>
+                    </div>
+                </form>
+
+                <h3 class="text-center">
+                    二维码批量上传
+                </h3> <button id= "batchUpload" class="btn btn-success btn-block" type="button">批量上传</button>
+                <h3 class="text-center">
+                    二维码批量下载
+                </h3> <button class="btn btn-success btn-block" type="button">批量下载</button>
+            </div>
+        </div>
+
+    </div>
+    <script type="text/javascript">
+        var all_tr = $("table tr");
+        all_tr.each(function (i) {
+            if(i>0){
+                var info = $(this).find("td").eq(3).html();
+//                var code = jQuery('#code').qrcode(info); //<!--如果不是用浏览器进行扫描的话，扫出来的是www.baidu.com这个文本，而不是调到这个页面，改为http://www.baidu.com的话，扫描后自动跳转到页面-->
+//                alert(code);
+//                $('table').find("tr").eq(i).find("td").eq(4).html(code);
+                var aim = "table tr:eq("+i+") td:eq(3)";
+                jQuery(aim).html("");
+                var code = jQuery(aim).qrcode({width: 128,height: 128,text:utf16to8(info)});
+//                $('table').find("tr").eq(i).find("td").eq(4).html(code);
+//                alert(code);
+            }
+
+        });
+        function utf16to8(str) {
+            var out, i, len, c;
+            out = "";
+            len = str.length;
+            for (i = 0; i < len; i++) {
+                c = str.charCodeAt(i);
+                if ((c >= 0x0001) && (c <= 0x007F)) {
+                    out += str.charAt(i);
+                } else if (c > 0x07FF) {
+                    out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                    out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                    out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                } else {
+                    out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                    out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                }
+            }
+            return out;
+        }
+
+        $(".btn-primary").click(function(){
+            var tr =$(this).closest("tr");
+            var col4_Data = tr.find("td:eq(3)").find("canvas");
+            var img = col4_Data[0].toDataURL("image/png");
+            var filename = tr.find("td:eq(0)").html()+".png";  //取id做图片名字
+            downLoadImage(img,filename);
+        });
+
+        function downLoadImage(img,name) {
+            var a = document.createElement("a");
+            a.href = img;
+            a.download = name;
+            a.click();
+        };
+
+        $(".btn-info").click(function(){
+            var tr =$(this).closest("tr");
+            var col4_Data = tr.find("td:eq(3)").find("canvas");
+            var filename = tr.find("td:eq(0)").html()+".png";
+            var img = col4_Data[0].toDataURL("image/jpg");
+            var arr = img.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+            while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+
+            var blob = new Blob([u8arr], {type:mime});
+
+            var formData = new FormData();
+
+            formData.append('file', blob,filename);
+            $.ajax({
+                     url:"/image/upload",
+                     type:'POST',
+                     data: formData,
+                     cache: false,
+                     contentType: false,    //不可缺
+                     processData: false,    //不可缺
+//                     enctype: 'multipart/form-data',
+                     success:function(data){
+                        alert(data.result);
+                     }
+            });
+        });
+        $("#batchUpload").click(function () {
+           $('#tb tr').each(function (i) {
+               if(i>0) {
+                   var id = $(this).children('td').eq(0).text();
+                   var col4_Data = $(this).find("td:eq(3)").find("canvas");
+                   var filename = id + ".png";
+                   var img = col4_Data[0].toDataURL("image/jpg");
+                   var arr = img.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                       bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+                   while (n--) {
+                       u8arr[n] = bstr.charCodeAt(n);
+                   }
+
+                   var blob = new Blob([u8arr], {type: mime});
+
+                   var formData = new FormData();
+
+                   formData.append('file', blob, filename);
+                   $.ajax({
+                       url: "/image/upload",
+                       type: 'POST',
+                       data: formData,
+                       cache: false,
+                       contentType: false,    //不可缺
+                       processData: false,    //不可缺
+                       success: function (data) {
+                           alert(data.result);
+                       }
+                   });
+               }
+           })
+        });
+    </script>
+</body>

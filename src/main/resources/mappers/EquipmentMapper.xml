@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.ems.mapper.EquipmentMapper" >
+
+    <resultMap id="BaseResultMap" type="com.example.ems.bean.Equipment" >
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="attribute" property="attribute" jdbcType="VARCHAR" />
+        <result column="value" property="value" jdbcType="VARCHAR" />
+        <result column="rights" property="rights" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        id, attribute, value, rights
+    </sql>
+
+<!--    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from em_equipment
+    </select>-->
+
+
+</mapper>
