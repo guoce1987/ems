@@ -71,7 +71,7 @@
                 </h3> <button id= "batchUpload" class="btn btn-success btn-block" type="button">批量上传</button>
                 <h3 class="text-center">
                     二维码批量下载
-                </h3> <button class="btn btn-success btn-block" type="button">批量下载</button>
+                </h3> <button id="batchDownload" class="btn btn-success btn-block" type="button">批量下载</button>
             </div>
         </div>
 
@@ -187,6 +187,19 @@
                    });
                }
            })
+        });
+        $("#batchDownload").click(function () {
+            //新开一个页面下载
+//            window.open("http://localhost:8082/image/download");
+            //在当强页面下载
+            var $eleForm = $("<form method='get'></form>");
+
+            $eleForm.attr("action","http://localhost:8082/image/download");
+
+            $(document.body).append($eleForm);
+
+            //提交表单，实现下载
+            $eleForm.submit();
         });
     </script>
 </body>
